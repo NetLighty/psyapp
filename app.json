@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "psyapp",
+    "scheme": "psyapp",
+    "slug": "psyapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",  // Указываем путь к вашей иконке
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.netlighty.psyapp"
+    },
+    "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "842f7c4d-c354-4359-88a8-3ce578854fbf"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
