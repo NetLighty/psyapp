@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 import NegativeThoughts from '../src/negative-thoughts';
 import APP_COLORS from '../src/assets/colors';
 import { ScreenContainer } from 'react-native-screens';
+import React from 'react';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingBottom: 20,
     backgroundColor: APP_COLORS.seaWaveTransitional,
     fontFamily: 'Poppins-Regular',
     fontSize: 14,

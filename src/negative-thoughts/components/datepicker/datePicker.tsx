@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import {
   format,
@@ -11,9 +11,11 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import { ru } from 'date-fns/locale';
 import APP_COLORS from '../../../assets/colors';
+import { useDateStore } from '../../store/dateStore';
 
 const DatePicker = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { date: selectedDate, setDate } = useDateStore();
+  const today = new Date();
 
   const daysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -40,9 +42,8 @@ const DatePicker = () => {
     0
   ).getDate();
 
-  const prevMonthPadding = (getDay(startOfMonth) + 6) % 7; // Определяем сколько дней предыдущего месяца отображать
+  const prevMonthPadding = (getDay(startOfMonth) + 6) % 7;
 
-  // Добавляем последние дни предыдущего месяца
   const prevMonthDays = Array.from(
     { length: prevMonthPadding },
     (_, i) => endOfPrevMonth - prevMonthPadding + i + 1
@@ -52,11 +53,17 @@ const DatePicker = () => {
   const extraDays = totalDays.length % 7 !== 0 ? 7 - (totalDays.length % 7) : 0;
 
   const handlePrevMonth = () => {
-    setSelectedDate(subMonths(selectedDate, 1));
+    const newDate = subMonths(selectedDate, 1);
+    newDate.setHours(selectedDate.getHours());
+    newDate.setMinutes(selectedDate.getMinutes());
+    setDate(newDate);
   };
 
   const handleNextMonth = () => {
-    setSelectedDate(addMonths(selectedDate, 1));
+    const newDate = addMonths(selectedDate, 1);
+    newDate.setHours(selectedDate.getHours());
+    newDate.setMinutes(selectedDate.getMinutes());
+    setDate(newDate);
   };
 
   const handleSelectDay = (day: number | null, isCurrentMonth: boolean) => {
@@ -66,22 +73,29 @@ const DatePicker = () => {
         selectedDate.getMonth(),
         day
       );
-      setSelectedDate(newDate);
+      newDate.setHours(selectedDate.getHours());
+      newDate.setMinutes(selectedDate.getMinutes());
+      setDate(newDate);
     }
   };
 
   const handleYesterday = () => {
-    setSelectedDate(subDays(selectedDate, 1));
+    const newDate = subDays(today, 1);
+    newDate.setHours(selectedDate.getHours());
+    newDate.setMinutes(selectedDate.getMinutes());
+    setDate(newDate);
   };
 
   const handleDayBeforeYesterday = () => {
-    setSelectedDate(subDays(selectedDate, 2));
+    const newDate = subDays(today, 2);
+    newDate.setHours(selectedDate.getHours());
+    newDate.setMinutes(selectedDate.getMinutes());
+    setDate(newDate);
   };
 
   return (
     <View style={styles.screen}>
       <View style={styles.container}>
-        {/* Month and Year Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>
             {format(selectedDate, 'LLLL yyyy', { locale: ru })}
@@ -108,7 +122,6 @@ const DatePicker = () => {
           </View>
         </View>
 
-        {/* Days of the week */}
         <View style={styles.daysOfWeekContainer}>
           {daysOfWeek.map((day) => (
             <View key={day} style={styles.dayHeader}>
@@ -117,7 +130,6 @@ const DatePicker = () => {
           ))}
         </View>
 
-        {/* Date grid */}
         <View style={styles.dateGrid}>
           {totalDays.map((day, index) => {
             const isPrevMonthDay = index < prevMonthPadding;
@@ -131,6 +143,8 @@ const DatePicker = () => {
             );
             const isSelected =
               isCurrentMonth && isSameDay(currentDate, selectedDate);
+            const isToday =
+              isCurrentMonth && isSameDay(currentDate, today) && !isSelected;
 
             return (
               <TouchableWithoutFeedback
@@ -144,6 +158,8 @@ const DatePicker = () => {
                       ? styles.inactiveDay
                       : isSelected
                       ? styles.selectedDay
+                      : isToday
+                      ? styles.todayDay
                       : styles.unselectedDay,
                   ]}
                 >
@@ -162,7 +178,6 @@ const DatePicker = () => {
               </TouchableWithoutFeedback>
             );
           })}
-          {/* Extra days to fill the row */}
           {Array.from({ length: extraDays }).map((_, index) => (
             <View key={`extra-${index}`} style={styles.inactiveDay}>
               <Text style={styles.inactiveDayText}>{index + 1}</Text>
@@ -170,7 +185,6 @@ const DatePicker = () => {
           ))}
         </View>
 
-        {/* Yesterday and Day Before Yesterday Buttons */}
         <View style={styles.footer}>
           <TouchableWithoutFeedback onPress={handleYesterday}>
             <View style={styles.footerButton}>
@@ -206,13 +220,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins-Medium',
     textTransform: 'capitalize',
+    color: APP_COLORS.blackPrimary,
   },
   arrowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   arrowTouchArea: {
-    paddingHorizontal: 10, // Увеличиваем область нажатия на стрелки
+    paddingHorizontal: 10,
   },
   daysOfWeekContainer: {
     flexDirection: 'row',
@@ -235,7 +250,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-around',
     marginBottom: 0,
-    minHeight: 240, // Резервируем место для дополнительной строки
+    minHeight: 240,
   },
   day: {
     width: 32,
@@ -258,6 +273,12 @@ const styles = StyleSheet.create({
   },
   selectedDay: {
     backgroundColor: '#249EA0',
+  },
+  todayDay: {
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#249EA0',
+    backgroundColor: '#D7DBDC',
   },
   selectedDayText: {
     color: APP_COLORS.white,

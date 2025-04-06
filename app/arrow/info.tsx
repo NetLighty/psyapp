@@ -200,22 +200,7 @@ const styles = StyleSheet.create({
   info: {
     zIndex: 10,
     marginTop: 26,
-    //height: 460,
-  },
-  thoughts: {
-    zIndex: 10,
-  },
-  infoContainer: {
-    backgroundColor: APP_COLORS.white,
-    paddingTop: 35,
-    paddingHorizontal: 20,
-    height: 360,
-  },
-  thoughtsContainer: {
-    backgroundColor: APP_COLORS.white,
-    paddingTop: 35,
-    paddingHorizontal: 20,
-    height: 360,
+    height: 390,
   },
   infoTextContainer: {
     display: 'flex',

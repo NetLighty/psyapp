@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text } from 'react-native';
 import APP_COLORS from '../src/assets/colors';
 import { Link } from 'expo-router';
+import React from 'react';
 
 export default function App() {
   return (

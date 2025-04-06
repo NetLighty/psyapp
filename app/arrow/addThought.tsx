@@ -2,25 +2,31 @@ import React, { useState } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import ContentBox from '../../src/negative-thoughts/components/contentBox';
 import DatePicker from '../../src/negative-thoughts/components/datepicker/datePicker';
 import InfoIcon from '../../src/assets/icons/info';
-import Thought from '../../src/negative-thoughts/components/thought';
 import APP_COLORS from '../../src/assets/colors';
 import ExerciseName from '../../src/components/exercersiceName';
 import DatePickerContainer from '../../src/negative-thoughts/components/datepicker/container';
+import { useThoughtsStore } from '../../src/negative-thoughts/store/thoughtsStore';
+import { useDateStore } from '../../src/negative-thoughts/store/dateStore';
 
 const AddThought: React.FC = () => {
   const [isRun, setIsRun] = useState(false);
-  const [thoughts, setThoughts] = useState([
-    { date: new Date() },
-  ]);
+  //const [thoughts, setThoughts] = useState([{ date: new Date() }]);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const { addThought, thoughts } = useThoughtsStore();
+  const { date } = useDateStore();
 
-  const addThought = (date: Date) => {
-    setDatePickerVisible(false);
+  const addThoughtHandler = (date: Date) => {
+    addThought(
+      'Негативная мысль',
+      'Я должна быть способна отпустить эту ситуацию, а вообще тут много текста всякого, ну не прям много но он есть, и его чуть больше чем по умолчанию отображается, вот',
+      date
+    );
+    //setDatePickerVisible(false);
     console.log(date, 'addthofth');
-    setThoughts([...thoughts, { date }]);
+    router.push('/arrow/exercise');
+    //setThoughts([...thoughts, { date }]);
   };
 
   const openDatePicker = () => {
@@ -40,16 +46,15 @@ const AddThought: React.FC = () => {
         <View style={styles.exerciseName}>
           <ExerciseName name={'Падающая стрела'} />
         </View>
-        <Text style={styles.title}>Выбери негативную мысль</Text>
+        <Text style={styles.title}>Негативная мысль</Text>
         <Text style={styles.postTitle}>
-          На основе которой выявишь иррациональное убеждение
+          Запиши негативную мысль, чтобы на основе ее выявить иррациональное
+          убеждение
         </Text>
       </View>
       <View style={styles.screen}>
-        <View style={styles.thoughts}>
-          <ContentBox thoughts={true}>
-            <DatePickerContainer />
-          </ContentBox>
+        <View style={styles.datePickerContainer}>
+          <DatePickerContainer />
         </View>
         <View style={styles.buttonsContainer}>
           <View
@@ -64,7 +69,7 @@ const AddThought: React.FC = () => {
           </View>
           <View
             style={[styles.button, styles.activeButton]}
-            /* onTouchEnd={() => setIsRun(true)} */
+            onTouchEnd={() => addThoughtHandler(date)}
           >
             <View style={[styles.slantLeft, styles.slantLeftActive]}></View>
             <View
@@ -90,7 +95,7 @@ const AddThought: React.FC = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    paddingBottom: 30,
+    //paddingBottom: 20,
   },
   exerciseName: {
     position: 'absolute',
@@ -201,10 +206,15 @@ const styles = StyleSheet.create({
     marginTop: 26,
     //height: 460,
   },
-  thoughts: {
-    //flex: 1,
+  datePickerContainer: {
+    flex: 1,
     //height: 'auto',
     zIndex: 10,
+    backgroundColor: APP_COLORS.white,
+    paddingTop: 20,
+    //paddingBottom: 30,
+    paddingHorizontal: 20,
+    borderRadius: 20,
   },
   infoContainer: {
     backgroundColor: APP_COLORS.white,

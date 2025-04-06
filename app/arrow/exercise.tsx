@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Text, StyleSheet, View, FlatList } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import ContentBox from '../../src/negative-thoughts/components/contentBox';
 import DatePicker from '../../src/negative-thoughts/components/datepicker/datePicker';
-import InfoIcon from '../../src/assets/icons/info';
-import Thought from '../../src/negative-thoughts/components/thought';
-import APP_COLORS from '../../src/assets/colors';
 import ExerciseName from '../../src/components/exercersiceName';
+import ThoughtGPT from '../../src/negative-thoughts/components/thoughtGPT';
+import APP_COLORS from '../../src/assets/colors';
+import { useThoughtsStore } from '../../src/negative-thoughts/store/thoughtsStore';
+import InfoIcon from '../../src/assets/icons/info';
+
+interface ThoughtItem {
+  id: string;
+  title: string;
+  description: string;
+  date: Date;
+  isPushed: boolean;
+  createdAt: Date;
+}
 
 const Exercise: React.FC = () => {
   const [isRun, setIsRun] = useState(false);
-  const [thoughts, setThoughts] = useState([
-    { date: new Date() },
-  ]);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const { thoughts, deleteThought, addThought } = useThoughtsStore();
 
-  const addThought = (date: Date) => {
-    setDatePickerVisible(false);
-    console.log(date, 'addthofth');
-    setThoughts([...thoughts, { date }]);
+  const addThoughtHandler = () => {
+    addThought(
+      'Негативная мысль',
+      'Я должна быть способна отпустить эту ситуацию, а вообще тут много текста всякого, ну не прям много но он есть, и его чуть больше чем по умолчанию отображается, вот',
+      new Date()
+    );
+    console.log('thought added!');
   };
 
   const openDatePicker = () => {
@@ -29,6 +40,16 @@ const Exercise: React.FC = () => {
   const cancelDatePicker = () => {
     setDatePickerVisible(false);
   };
+
+  const renderThought = ({ item }: { item: ThoughtItem }) => (
+    <ThoughtGPT
+      id={item.id}
+      title={item.title}
+      description={item.description}
+      date={item.date}
+      isPushed={item.isPushed}
+    />
+  );
 
   return (
     <View style={styles.screen}>
@@ -44,52 +65,43 @@ const Exercise: React.FC = () => {
           На основе которой выявишь иррациональное убеждение
         </Text>
       </View>
-      <View style={styles.screen}>
-        <View style={styles.thoughts}>
-          <ContentBox thoughts={true}>
-            <View style={styles.infoTextContainer}>
-              {thoughts.map((thought, index) => (
-                <Thought
-                  key={index}
-                  title={'Негативная мысль'}
-                  description={`Я должна быть способна отпустить эту ситуацию, а вообще тут много текста всякого, ну не прям много но он есть, и его чуть больше чем по умолчанию отображается, вот`}
-                  date={thought.date}
-                />
-              ))}
-            </View>
-          </ContentBox>
-        </View>
-        <View style={styles.buttonsContainer}>
-          <View
-            style={[styles.button]}
-            onTouchEnd={() => router.push('/arrow/info')}
-          >
-            <View style={styles.slantRight}></View>
-            <View style={styles.textContainer}>
-              <Text style={[styles.buttonText]}>Информация</Text>
-              <InfoIcon />
-            </View>
-          </View>
-          <View
-            style={[styles.button, styles.activeButton]}
-            onTouchEnd={() => router.push('/arrow/addThought')}
-          >
-            <View style={[styles.slantLeft, styles.slantLeftActive]}></View>
-            <View
-              style={styles.textContainer} /* onTouchEnd={openDatePicker} */
-            >
-              <Text style={[styles.buttonText, styles.green]}>
-                Добавить мысль
-              </Text>
-            </View>
-          </View>
-        </View>
-        {/* {isDatePickerVisible ? (
-            <DatePickerModal
-                onConfirm={addThought} // Передаем функцию для добавления мысли
-                onCancel={cancelDatePicker} // Закрываем модалку при отмене
+      <View style={styles.thoughts}>
+        <ContentBox thoughts={true}>
+          <FlatList
+            data={thoughts}
+            renderItem={renderThought}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.infoTextContainer}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={7}
+            maxToRenderPerBatch={5}
+            windowSize={5}
           />
-          ) : null} */}
+        </ContentBox>
+      </View>
+      <View style={styles.buttonsContainer}>
+        <View
+          style={[styles.button]}
+          onTouchEnd={() => router.push('/arrow/info')}
+        >
+          <View style={styles.slantRight}></View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.buttonText]}>Информация</Text>
+            <InfoIcon />
+          </View>
+        </View>
+        <View
+          style={[styles.button, styles.activeButton]}
+          /* onTouchEnd={() => addThoughtHandler()} */
+          onTouchEnd={() => router.push('/arrow/addThought')}
+        >
+          <View style={[styles.slantLeft, styles.slantLeftActive]}></View>
+          <View style={styles.textContainer} /* onTouchEnd={openDatePicker} */ >
+            <Text style={[styles.buttonText, styles.green]}>
+              Добавить мысль
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -98,7 +110,7 @@ const Exercise: React.FC = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    paddingBottom: 30,
+    paddingBottom: 0,
   },
   exerciseName: {
     position: 'absolute',
@@ -133,13 +145,13 @@ const styles = StyleSheet.create({
     color: APP_COLORS.seaWaveTransitional,
   },
   buttonText: {
-    color: '#FFF', // Цвет текста
-    textAlign: 'center', // Выравнивание текста по центру
-    fontFamily: 'Poppins-Bold', // Шрифт Poppins
-    fontSize: 14, // Размер шрифта в пикселях
-    fontStyle: 'normal', // Обычный стиль шрифта (по умолчанию)
-    fontWeight: '600', // Толщина шрифта (полужирный)
-    lineHeight: 19.6, // Высота строки в пикселях
+    color: '#FFF',
+    textAlign: 'center',
+    fontFamily: 'Poppins-Bold',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    lineHeight: 19.6,
   },
   activeButton: {
     zIndex: 2,
@@ -154,11 +166,8 @@ const styles = StyleSheet.create({
     height: 71,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    //paddingVertical: 18,
-    //paddingHorizontal: 19,
     justifyContent: 'flex-end',
-    //alignItems: 'center',
-    flexShrink: 0, // Для предотвращения сжатия
+    flexShrink: 0,
   },
   arrowBack: {
     width: 25,
@@ -173,9 +182,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 24, // Размер в точках (pt), а не в пикселях (px)
+    fontSize: 24,
     fontWeight: '700',
-    lineHeight: 33.6, // Проценты не используются, указывается конкретное значение
+    lineHeight: 33.6,
     color: APP_COLORS.white,
   },
   postTitle: {
@@ -207,12 +216,10 @@ const styles = StyleSheet.create({
   info: {
     zIndex: 10,
     marginTop: 26,
-    //height: 460,
   },
   thoughts: {
-    //flex: 1,
-    //height: 'auto',
     zIndex: 10,
+    flex: 1,
   },
   infoContainer: {
     backgroundColor: APP_COLORS.white,
@@ -223,6 +230,7 @@ const styles = StyleSheet.create({
   infoTextContainer: {
     display: 'flex',
     gap: 10,
+    paddingBottom: 20,
   },
   text: {
     color: APP_COLORS.blackPrimary,
@@ -243,7 +251,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 60,
     borderBottomColor: 'transparent',
     borderRightWidth: 30,
-    borderRightColor: APP_COLORS.seaWavePrimary, // Цвет, который делает срез
+    borderRightColor: APP_COLORS.seaWavePrimary,
   },
   slantRight: {
     position: 'absolute',
@@ -254,7 +262,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 60,
     borderBottomColor: 'transparent',
     borderLeftWidth: 30,
-    borderLeftColor: APP_COLORS.seaWavePrimary, // Цвет, который делает срез
+    borderLeftColor: APP_COLORS.seaWavePrimary,
   },
   slantRightActive: {
     borderLeftColor: APP_COLORS.white,

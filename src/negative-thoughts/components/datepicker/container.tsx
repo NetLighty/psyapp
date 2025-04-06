@@ -17,13 +17,15 @@ import APP_COLORS from '../../../assets/colors';
 import { formatDate } from '../../../assets/utils/formatDate';
 import DatePicker from './datePicker';
 import TimePicker from './timePicker';
+import { useDateStore } from '../../store/dateStore';
+import Entypo from '@expo/vector-icons/Entypo';
 
 const { width } = Dimensions.get('window');
 
 const DatePickerContainer = () => {
   const [activeTab, setActiveTab] = useState<'date' | 'time'>('date');
   const [translateX] = useState(new Animated.Value(0));
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { date } = useDateStore();
 
   const handleSwitch = (tab: 'date' | 'time') => {
     setActiveTab(tab);
@@ -45,9 +47,17 @@ const DatePickerContainer = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.date}>{formatDate(selectedDate)}</Text>
+      <View style={styles.dateContainer}>
+        <Text style={styles.date}>{formatDate(date)}</Text>
+        <Entypo
+          style={styles.dateArrow}
+          name="chevron-small-up"
+          size={18}
+          color={APP_COLORS.gray80Percent}
+        />
+      </View>
 
-      <View style={{ flex: 1 }}>
+      <View style={styles.pickerContent}>
         {activeTab === 'date' ? <DatePicker /> : <TimePicker />}
       </View>
 
@@ -88,6 +98,17 @@ const styles = StyleSheet.create({
   container: {
     padding: 0,
     flex: 1,
+    //minHeight: 480,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  dateArrow: {
+    position: 'absolute',
+    right: 27,
   },
   date: {
     textAlign: 'center',
@@ -97,15 +118,17 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     fontSize: 14,
   },
+  pickerContent: {
+    flex: 1,
+  },
   buttonContainer: {
-    marginTop: 25,
+    marginTop: 40, // Увеличен отступ сверху для смещения вниз
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
     alignItems: 'center',
     position: 'relative',
-    flex: 1, // Распределяем оставшееся пространство
-    gap: 8, // Зазор между кнопками
+    gap: 8,
   },
   iconContainer: {
     flexDirection: 'row',

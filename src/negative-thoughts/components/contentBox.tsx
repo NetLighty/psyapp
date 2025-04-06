@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import APP_COLORS from '../../assets/colors';
 
 interface ContentBoxProps {
@@ -9,23 +9,26 @@ interface ContentBoxProps {
 
 const ContentBox: React.FC<ContentBoxProps> = ({ children, thoughts }) => {
   return (
-    <View>
+    <View style={styles.outerContainer}>
       {thoughts ? (
-        <View>
-          <View
-            style={[
-              styles.container,
-              thoughts ? styles.thoughtsContainer : null,
-            ]}
-          >
-            <ScrollView style={styles.scrollContainer}>{children}</ScrollView>
-          </View>
+        <View style={[styles.container, styles.thoughtsContainer]}>
+          {React.Children.map(children, (child, index) =>
+            typeof child === 'string' ? (
+              <Text key={index} style={styles.debugText}>{child}</Text>
+            ) : (
+              child
+            )
+          )}
         </View>
       ) : (
-        <View
-          style={[styles.container, thoughts ? styles.thoughtsContainer : null]}
-        >
-          {children}
+        <View style={styles.container}>
+          {React.Children.map(children, (child, index) =>
+            typeof child === 'string' ? (
+              <Text key={index} style={styles.debugText}>{child}</Text>
+            ) : (
+              child
+            )
+          )}
         </View>
       )}
     </View>
@@ -33,21 +36,23 @@ const ContentBox: React.FC<ContentBoxProps> = ({ children, thoughts }) => {
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1, // Растягиваем внешний контейнер на всю доступную высоту
+  },
   container: {
     backgroundColor: APP_COLORS.white,
     paddingTop: 20,
     paddingHorizontal: 20,
-    minHeight: 380,
+    minHeight: 390, // Минимальная высота сохранена
     borderRadius: 20,
+    flex: 1, // Внутренний контейнер тоже растягивается
   },
   thoughtsContainer: {
     paddingVertical: 20,
     paddingRight: 10,
-    overflow: 'scroll',
   },
-  scrollContainer: {
-    //flex: 1,
-    paddingRight: 10,
+  debugText: {
+    color: 'red', // Для отладки
   },
 });
 
